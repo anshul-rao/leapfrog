@@ -9,9 +9,12 @@ screenHeight = 640
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("CSC Pygame Sample -- Flopping Frog")
 font = pygame.font.Font("font/Roboto-Thin.ttf", 18)
+scoreFont = pygame.font.Font("font/KGHAPPYSolid.ttf", 70)
+scoreWidth = 0
 
 # ----- Game Variables ----- #
 grav = 0.25
+
 BG = pygame.Color('#BEE0B4')
 startIMG = pygame.image.load('img/startbtn.png').convert_alpha()
 exitIMG = pygame.image.load('img/exitbtn.png').convert_alpha()
@@ -22,13 +25,19 @@ logo = pygame.transform.scale(logo, (int(logo.get_width() * .4), int(logo.get_he
 
 background = pygame.image.load('img/bg.png').convert_alpha()
 background = pygame.transform.scale(background, (int(background.get_width() * 2.2), int(background.get_height() * 2.2)))
-
 backgroundRect = background.get_rect()
 backgroundTwo = pygame.image.load('img/bg.png').convert_alpha()
 backgroundTwo = pygame.transform.scale(backgroundTwo,
                                        (int(backgroundTwo.get_width() * 2.2), int(backgroundTwo.get_height() * 2.2)))
 backgroundTwoRect = backgroundTwo.get_rect()
 backgroundTwoRect.y = -640
+
+bell = pygame.mixer.Sound('sound/bell.wav')
+bell.set_volume(.5)
+coin = pygame.mixer.Sound('sound/coin.wav')
+death = pygame.mixer.Sound('sound/death.wav')
+
+fliesCollected = 0
 
 moveLeft = False
 moveRight = False
@@ -93,6 +102,12 @@ class Fly(pygame.sprite.Sprite):
             frog.boost = True
             frog.velY = -9
             self.isHit = True
+            if (frog.flyCount % 10 == 0) and (frog.flyCount != 0):
+                coin.play()
+                frog.score += 500
+            else:
+                bell.play()
+            frog.flyCount += 1
 
     def updateAnimation(self):
         # Update Animation
@@ -118,7 +133,9 @@ class Frog(pygame.sprite.Sprite):
         )
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self._boost = False
+        self.boost = False
+        self.flyCount = 0
+        self.score = 0
 
         # Direction
 
@@ -163,6 +180,7 @@ class Frog(pygame.sprite.Sprite):
             self.velY = 8
 
         dy += self.velY
+        self.score -= self.velY
 
         if self.rect.left >= screenWidth:
             # dx = 0
@@ -177,14 +195,34 @@ class Frog(pygame.sprite.Sprite):
 
     def boost(self):
         if self.rect.colliderect(flies[i].rect):
-            self._boost = True
+            self.boost = True
             self.velY = -9
+
+    def getScore(self):
+        return self.score
+
+    def getFlyCount(self):
+        return self.flyCount
 
 
 def updateFPS():
     fps = str(int(clock.get_fps()))
     fpsText = font.render(fps, 1, pygame.Color("#2F4F4F"))
     return fpsText
+
+
+def displayFlyCount():
+    count = 'FLY COUNT: ' + str(frog.getFlyCount() - 1)
+    flyCountText = font.render(count, 1, pygame.Color('#2F4F4F'))
+    return flyCountText
+
+
+def displayScore():
+    score = str(int(frog.getScore()))
+    scoreText = scoreFont.render(score, 1, pygame.Color('#2F4F4F'))
+    global scoreWidth
+    scoreWidth = scoreText.get_width()
+    return scoreText
 
 
 def camera():
@@ -229,10 +267,10 @@ startBTN = Button((screenWidth / 4) - 100, screenHeight // 1.75, startIMG, 0.25)
 exitBTN = Button((3 * (screenWidth / 4)) - 125, screenHeight // 1.75, exitIMG, 0.25)
 
 # ----- Main Game Loop ----- #
+global mainMenu
 mainMenu = True
 run = True
 while run:
-
     clock.tick(FPS)
 
     draw_bg()
@@ -241,12 +279,16 @@ while run:
 
     if mainMenu:
         screen.blit(logo, logoRect)
+        screen.blit(displayScore(), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 25))
         if startBTN.draw():
             mainMenu = False
         if exitBTN.draw():
             run = False
 
     else:
+        screen.blit(displayFlyCount(), (screenWidth - 125, 5))
+        screen.blit(displayScore(), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 230))
+
         frog.draw()
         initialBoost.draw()
         camera()
@@ -267,6 +309,7 @@ while run:
 
         # Check if Alive
         if frog.rect.top >= screenHeight and mainMenu is False:
+            death.play()
             frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
             initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
             for fly in flies:
