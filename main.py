@@ -269,6 +269,10 @@ while run:
         if frog.rect.top >= screenHeight and mainMenu is False:
             frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
             initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
+            for fly in flies:
+                fly.rect.x = random.randint(0, screenWidth)
+                fly.rect.y = random.randint(0, screenHeight * 0.75)
+
             mainMenu = True
 
         for event in pygame.event.get():
