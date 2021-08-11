@@ -12,8 +12,13 @@ font = pygame.font.Font("font/Roboto-Thin.ttf", 18)
 # ----- Game Variables ----- #
 grav = 0.25
 BG = pygame.Color('#BEE0B4')
-startIMG = pygame.image.load('img/startbtn.png')
-exitIMG = pygame.image.load('img/exitbtn.png')
+startIMG = pygame.image.load('img/startbtn.png').convert_alpha()
+exitIMG = pygame.image.load('img/exitbtn.png').convert_alpha()
+logo = pygame.image.load('img/logo.png').convert_alpha()
+logoRect = logo.get_rect()
+logoRect.x = (screenWidth/2)-183
+logo = pygame.transform.scale(logo, (int(logo.get_width() * .4), int(logo.get_height() * .4)))
+
 moveLeft = False
 moveRight = False
 clock = pygame.time.Clock()
@@ -111,7 +116,7 @@ class Frog(pygame.sprite.Sprite):
         self.velY = 0
 
     def draw(self):
-        if self.velY < 0:
+        if self.velY < -3:
             image = "frogjump"
         elif moveLeft:
             image = "frogleft"
@@ -216,6 +221,7 @@ while run:
     screen.blit(updateFPS(), (10, 5))
 
     if mainMenu:
+        screen.blit(logo, logoRect)
         if startBTN.draw():
             mainMenu = False
         if exitBTN.draw():
