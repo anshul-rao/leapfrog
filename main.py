@@ -1,6 +1,7 @@
 import colorsys
 import pygame
 import random
+from background import Background
 
 # ----- Window Initializations ----- #
 pygame.init()
@@ -29,6 +30,7 @@ backgroundTwo = pygame.transform.scale(backgroundTwo,
                                        (int(backgroundTwo.get_width() * 2.2), int(backgroundTwo.get_height() * 2.2)))
 backgroundTwoRect = backgroundTwo.get_rect()
 backgroundTwoRect.y = -640
+bg = [Background(), Background(), Background()]
 
 moveLeft = False
 moveRight = False
@@ -261,6 +263,11 @@ while run:
             run = False
 
     else:
+        # screen.fill("#FFFFFF")
+        for t in bg:
+            t.setSprite(((frog.rect.y / 50) % 100) / 100)
+            screen.blit(t.sprite, (0, t.position))
+
         frog.draw()
         initialBoost.draw()
         camera()
