@@ -267,6 +267,8 @@ while run:
 
         # Check if Alive
         if frog.rect.top >= screenHeight and mainMenu is False:
+            frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
+            initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
             mainMenu = True
 
         for event in pygame.event.get():
