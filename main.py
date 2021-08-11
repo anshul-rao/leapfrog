@@ -1,7 +1,6 @@
 import colorsys
 import pygame
 import random
-from background import Background
 
 # ----- Window Initializations ----- #
 pygame.init()
@@ -30,7 +29,6 @@ backgroundTwo = pygame.transform.scale(backgroundTwo,
                                        (int(backgroundTwo.get_width() * 2.2), int(backgroundTwo.get_height() * 2.2)))
 backgroundTwoRect = backgroundTwo.get_rect()
 backgroundTwoRect.y = -640
-bg = [Background(), Background(), Background()]
 
 moveLeft = False
 moveRight = False
@@ -43,19 +41,6 @@ def draw_bg():
     # screen.fill(BG)
     screen.blit(background, (0, backgroundRect.y))
     screen.blit(background, (0, backgroundTwoRect.y))
-
-
-class Background:
-    def __init__(self):
-        self.sprite = pygame.image.load('img/bg.png')
-        self.position = 0
-        self.uncoloredSprite = pygame.image.load('img/bg.png')
-
-    def setSprite(self, tint):
-        copy = self.uncoloredSprite.copy()
-        color = colorsys.hsv_to_rgb(tint, 1, 1)
-        copy.fill((color[0] * 255, color[1] * 255, color[2] * 255), special_flags=pygame.BLEND_ADD)
-        self.sprite = copy
 
 
 class Button():
@@ -248,7 +233,6 @@ mainMenu = True
 run = True
 while run:
 
-    bg = [Background(), Background(), Background()]
     clock.tick(FPS)
 
     draw_bg()
@@ -263,11 +247,6 @@ while run:
             run = False
 
     else:
-        # screen.fill("#FFFFFF")
-        for t in bg:
-            t.setSprite(((frog.rect.y / 50) % 100) / 100)
-            screen.blit(t.sprite, (0, t.position))
-
         frog.draw()
         initialBoost.draw()
         camera()
