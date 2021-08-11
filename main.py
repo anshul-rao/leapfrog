@@ -1,4 +1,5 @@
-import random, pygame, colorsys, sys
+import pygame
+import random
 
 # ----- Window Initializations ----- #
 pygame.init()
@@ -11,13 +12,12 @@ font = pygame.font.Font("font/Roboto-Thin.ttf", 18)
 # ----- Game Variables ----- #
 grav = 0.25
 BG = pygame.Color('#BEE0B4')
+startIMG = pygame.image.load('img/startbtn.png')
+exitIMG = pygame.image.load('img/exitbtn.png')
 moveLeft = False
 moveRight = False
 clock = pygame.time.Clock()
 FPS = 60
-
-
-# load cam
 
 
 # ----- Functions and Classes ----- #
@@ -25,19 +25,33 @@ def draw_bg():
     screen.fill(BG)
 
 
-"""
-class Background:
-    def __init__(self):
-        self.sprite = pygame.image.load('img/bg.png')
-        self.position = 0
-        self.uncoloredSprite = pygame.image.load('img/bg.png')
+class Button():
+    def __init__(self, x, y, image, scale):
+        self.image = pygame.transform.scale(
+            image, (int(image.get_width() * scale), int(image.get_height() * scale))
+        )
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
 
-    def setSprite(self, tint):
-        copy = self.uncoloredSprite.copy()
-        color = colorsys.hsv_to_rgb(tint, 1, 1)
-        copy.fill((color[0] * 255, color[1] * 255, color[2] * 255), special_flags=pygame.BLEND_ADD)
-        self.sprite = copy
-"""
+    def draw(self):
+        action = False
+
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and (self.clicked is False):
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        # draw button
+        screen.blit(self.image, self.rect)
+
+        return action
 
 
 class Fly(pygame.sprite.Sprite):
@@ -97,6 +111,19 @@ class Frog(pygame.sprite.Sprite):
         self.velY = 0
 
     def draw(self):
+        if self.velY < 0:
+            image = "frogjump"
+        elif moveLeft:
+            image = "frogleft"
+        elif moveRight:
+            image = "frogright"
+        else:
+            image = "frog"
+        image = f"img/{image}.png"
+        image = pygame.image.load(image).convert_alpha()
+        self.image = pygame.transform.scale(
+            image, (int(image.get_width() * 0.17), int(image.get_height() * 0.17))
+        )
         screen.blit(self.image, self.rect)
 
     def move(self, moveLeft, moveRight):
@@ -166,60 +193,80 @@ def collisionCheck(frog: Frog, flies: list[Fly]) -> list[Fly]:
                 0.12,
             )
         flies[i].isHit = False
+        # frog.isHit = False
+
     return flies
 
 
 initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
 frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
 
+startBTN = Button(screenWidth // 2 - 175, screenHeight // 1.75, startIMG, 0.5)
+exitBTN = Button(screenWidth // 2 + 50, screenHeight // 1.75, exitIMG, 0.5)
+
 # ----- Main Game Loop ----- #
+mainMenu = True
 run = True
 while run:
 
     clock.tick(FPS)
 
     draw_bg()
+
     screen.blit(updateFPS(), (10, 5))
-    frog.draw()
-    initialBoost.draw()
-    camera()
 
-    # Initial Boost
-    if initialBoost.isHit:
-        initialBoost.rect.x = 1000
-    frog.move(moveLeft, moveRight)
+    if mainMenu:
+        if startBTN.draw():
+            mainMenu = False
+        if exitBTN.draw():
+            run = False
 
-    for fly in flies:
-        fly.draw()
-        fly.updateAnimation()
-        if fly.rect.top >= screenHeight:
-            fly.rect.x = random.randint(0, screenWidth)
-            fly.rect.y = random.randint(0, screenHeight * 0.75)
+    else:
+        frog.draw()
+        initialBoost.draw()
+        camera()
 
-    flies = collisionCheck(frog, flies)
+        # Initial Boost
+        if initialBoost.isHit:
+            initialBoost.rect.x = 1000
+        frog.move(moveLeft, moveRight)
 
-    # Check if Alive
-    if frog.rect.top >= screenHeight:
-        run = False
+        for fly in flies:
+            fly.draw()
+            fly.updateAnimation()
+            if fly.rect.top >= screenHeight:
+                fly.rect.x = random.randint(0, screenWidth)
+                fly.rect.y = random.randint(0, screenHeight * 0.75)
+
+        flies = collisionCheck(frog, flies)
+
+        # Check if Alive
+        if frog.rect.top >= screenHeight:
+            run = False
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                run = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    run = False
+                if event.key == pygame.K_a:
+                    moveLeft = True
+                if event.key == pygame.K_d:
+                    moveRight = True
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_a:
+                    moveLeft = False
+                if event.key == pygame.K_d:
+                    moveRight = False
 
     for event in pygame.event.get():
         # Quit Game
         if event.type == pygame.QUIT:
             run = False
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                run = False
-            if event.key == pygame.K_a:
-                moveLeft = True
-            if event.key == pygame.K_d:
-                moveRight = True
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                moveLeft = False
-            if event.key == pygame.K_d:
-                moveRight = False
 
     pygame.display.update()
 
