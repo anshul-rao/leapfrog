@@ -1,3 +1,4 @@
+import colorsys
 import pygame
 import random
 
@@ -16,8 +17,18 @@ startIMG = pygame.image.load('img/startbtn.png').convert_alpha()
 exitIMG = pygame.image.load('img/exitbtn.png').convert_alpha()
 logo = pygame.image.load('img/logo.png').convert_alpha()
 logoRect = logo.get_rect()
-logoRect.x = (screenWidth/2)-183
+logoRect.x = (screenWidth / 2) - 184
 logo = pygame.transform.scale(logo, (int(logo.get_width() * .4), int(logo.get_height() * .4)))
+
+background = pygame.image.load('img/bg.png').convert_alpha()
+background = pygame.transform.scale(background, (int(background.get_width() * 2.2), int(background.get_height() * 2.2)))
+
+backgroundRect = background.get_rect()
+backgroundTwo = pygame.image.load('img/bg.png').convert_alpha()
+backgroundTwo = pygame.transform.scale(backgroundTwo,
+                                       (int(backgroundTwo.get_width() * 2.2), int(backgroundTwo.get_height() * 2.2)))
+backgroundTwoRect = backgroundTwo.get_rect()
+backgroundTwoRect.y = -640
 
 moveLeft = False
 moveRight = False
@@ -27,7 +38,22 @@ FPS = 60
 
 # ----- Functions and Classes ----- #
 def draw_bg():
-    screen.fill(BG)
+    # screen.fill(BG)
+    screen.blit(background, (0, backgroundRect.y))
+    screen.blit(background, (0, backgroundTwoRect.y))
+
+
+class Background:
+    def __init__(self):
+        self.sprite = pygame.image.load('img/bg.png')
+        self.position = 0
+        self.uncoloredSprite = pygame.image.load('img/bg.png')
+
+    def setSprite(self, tint):
+        copy = self.uncoloredSprite.copy()
+        color = colorsys.hsv_to_rgb(tint, 1, 1)
+        copy.fill((color[0] * 255, color[1] * 255, color[2] * 255), special_flags=pygame.BLEND_ADD)
+        self.sprite = copy
 
 
 class Button():
@@ -176,13 +202,19 @@ def updateFPS():
 
 def camera():
     if frog.rect.top <= screenHeight / 3:
+        backgroundRect.y += abs(frog.velY)
+        backgroundTwoRect.y += abs(frog.velY)
         frog.rect.y += abs(frog.velY)
         for fly in flies:
             fly.rect.y += abs(frog.velY)
+    if backgroundRect.top >= screenHeight:
+        backgroundRect.y = -640
+    if backgroundTwoRect.top >= screenHeight:
+        backgroundTwoRect.y = -640
 
 
 flies = []
-n = 5
+n = 6
 for i in range(n):
     flies.append(
         Fly((random.randint(0, screenWidth)), (random.randint(0, screenHeight)), 0.12)
@@ -206,14 +238,15 @@ def collisionCheck(frog: Frog, flies: list[Fly]) -> list[Fly]:
 initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
 frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
 
-startBTN = Button(screenWidth // 2 - 175, screenHeight // 1.75, startIMG, 0.5)
-exitBTN = Button(screenWidth // 2 + 50, screenHeight // 1.75, exitIMG, 0.5)
+startBTN = Button((screenWidth / 4) - 100, screenHeight // 1.75, startIMG, 0.25)
+exitBTN = Button((3 * (screenWidth / 4)) - 125, screenHeight // 1.75, exitIMG, 0.25)
 
 # ----- Main Game Loop ----- #
 mainMenu = True
 run = True
 while run:
 
+    bg = [Background(), Background(), Background()]
     clock.tick(FPS)
 
     draw_bg()
@@ -247,8 +280,8 @@ while run:
         flies = collisionCheck(frog, flies)
 
         # Check if Alive
-        if frog.rect.top >= screenHeight:
-            run = False
+        if frog.rect.top >= screenHeight and mainMenu is False:
+            mainMenu = True
 
         for event in pygame.event.get():
 
