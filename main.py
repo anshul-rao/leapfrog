@@ -1,5 +1,7 @@
 import pygame
 import random
+import math
+import time
 
 # ----- Window Initializations ----- #
 pygame.init()
@@ -7,9 +9,11 @@ screenWidth = 480
 screenHeight = 640
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("CSC Pygame Sample -- Flopping Frog")
-font = pygame.font.Font("font/Roboto-Thin.ttf", 18)
+font = pygame.font.Font("font/KGHAPPYSolid.ttf", 18)
 scoreFont = pygame.font.Font("font/KGHAPPYSolid.ttf", 70)
+entryFont = pygame.font.Font("font/KGHAPPYSolid.ttf", 40)
 scoreWidth = 0
+scoreHeight = 0
 
 # ----- Game Variables ----- #
 grav = 0.25
@@ -23,11 +27,11 @@ logoRect.x = (screenWidth / 2) - 184
 logo = pygame.transform.scale(logo, (int(logo.get_width() * .4), int(logo.get_height() * .4)))
 
 background = pygame.image.load('img/bg.png').convert_alpha()
-background = pygame.transform.scale(background, (int(background.get_width() * 2.2), int(background.get_height() * 2.2)))
+background = pygame.transform.scale(background, (int(background.get_width() * 1.3), int(background.get_height() * 1.3)))
 backgroundRect = background.get_rect()
 backgroundTwo = pygame.image.load('img/bg.png').convert_alpha()
 backgroundTwo = pygame.transform.scale(backgroundTwo,
-                                       (int(backgroundTwo.get_width() * 2.2), int(backgroundTwo.get_height() * 2.2)))
+                                       (int(backgroundTwo.get_width() * 1.3), int(backgroundTwo.get_height() * 1.3)))
 backgroundTwoRect = backgroundTwo.get_rect()
 backgroundTwoRect.y = -640
 
@@ -111,12 +115,14 @@ class Fly(pygame.sprite.Sprite):
     def updateAnimation(self):
         # Update Animation
         animationCooldown = 10
+
         # Update image depending on current frame
         self.image = self.animationList[self.frameIndex]
         # Check if enough time has passed since update
         if pygame.time.get_ticks() - self.updateTime > animationCooldown:
             self.updateTime = pygame.time.get_ticks()
             self.frameIndex += 1
+
         # Loop back to beg of animation
         if self.frameIndex >= len(self.animationList):
             self.frameIndex = 0
@@ -145,7 +151,10 @@ class Frog(pygame.sprite.Sprite):
         self.velY = 0
 
     def draw(self):
-        if self.velY < -3:
+
+        if ((self.flyCount - 1) % 10 == 0) and self.flyCount > 5:
+            image = "froglow"
+        elif self.velY < -3:
             image = "frogjump"
         elif moveLeft:
             image = "frogleft"
@@ -217,10 +226,16 @@ def displayFlyCount():
 
 
 def displayScore(score: int):
-    score = str(int(score))
-    scoreText = scoreFont.render(score, 1, pygame.Color('#2F4F4F'))
+    if score == 0:
+        score = 'Jump to the sky!'
+        scoreText = entryFont.render(score, 1, pygame.Color('#2F4F4F'))
+    else:
+        score = str(int(score / 10))
+        scoreText = scoreFont.render(score, 1, pygame.Color('#2F4F4F'))
     global scoreWidth
     scoreWidth = scoreText.get_width()
+    global scoreHeight
+    scoreHeight = scoreText.get_height()
     return scoreText
 
 
@@ -278,15 +293,20 @@ while run:
     screen.blit(updateFPS(), (10, 5))
 
     if mainMenu:
-        screen.blit(logo, logoRect)
+        # screen.blit(logo, logoRect)
+        screen.blit(logo, (screen.get_width() / 2 - logo.get_width() / 2,
+                           screen.get_height() / 2 - 130 - logo.get_height() / 2 + math.sin(time.time() * 5) * 5 - 25))
+
         screen.blit(displayScore(menuScore), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 25))
+
         if startBTN.draw():
             mainMenu = False
         if exitBTN.draw():
+            death.play()
             run = False
 
     else:
-        screen.blit(displayFlyCount(), (screenWidth - 125, 5))
+        screen.blit(displayFlyCount(), (screenWidth - 165, 5))
         screen.blit(displayScore(frog.getScore()), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 230))
 
         frog.draw()
@@ -327,15 +347,15 @@ while run:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     moveLeft = True
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     moveRight = True
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     moveLeft = False
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     moveRight = False
 
     for event in pygame.event.get():
