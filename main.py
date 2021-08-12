@@ -1,4 +1,3 @@
-import colorsys
 import pygame
 import random
 
@@ -217,8 +216,8 @@ def displayFlyCount():
     return flyCountText
 
 
-def displayScore():
-    score = str(int(frog.getScore()))
+def displayScore(score: int):
+    score = str(int(score))
     scoreText = scoreFont.render(score, 1, pygame.Color('#2F4F4F'))
     global scoreWidth
     scoreWidth = scoreText.get_width()
@@ -266,8 +265,9 @@ frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
 startBTN = Button((screenWidth / 4) - 100, screenHeight // 1.75, startIMG, 0.25)
 exitBTN = Button((3 * (screenWidth / 4)) - 125, screenHeight // 1.75, exitIMG, 0.25)
 
+menuScore = 0
+
 # ----- Main Game Loop ----- #
-global mainMenu
 mainMenu = True
 run = True
 while run:
@@ -279,7 +279,7 @@ while run:
 
     if mainMenu:
         screen.blit(logo, logoRect)
-        screen.blit(displayScore(), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 25))
+        screen.blit(displayScore(menuScore), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 25))
         if startBTN.draw():
             mainMenu = False
         if exitBTN.draw():
@@ -287,7 +287,7 @@ while run:
 
     else:
         screen.blit(displayFlyCount(), (screenWidth - 125, 5))
-        screen.blit(displayScore(), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 230))
+        screen.blit(displayScore(frog.getScore()), ((screenWidth / 2) - scoreWidth / 2, (screenHeight / 2) - 230))
 
         frog.draw()
         initialBoost.draw()
@@ -309,6 +309,7 @@ while run:
 
         # Check if Alive
         if frog.rect.top >= screenHeight and mainMenu is False:
+            menuScore = frog.getScore()
             death.play()
             frog = Frog(screenWidth / 2, screenHeight - 150, 0.17, 5)
             initialBoost = Fly(screenWidth / 2, screenHeight - 150, .1)
