@@ -9,9 +9,10 @@ screenWidth = 480
 screenHeight = 640
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("CSC Pygame Sample -- Flopping Frog")
-font = pygame.font.Font("font/KGHAPPYSolid.ttf", 18)
-scoreFont = pygame.font.Font("font/KGHAPPYSolid.ttf", 70)
-entryFont = pygame.font.Font("font/KGHAPPYSolid.ttf", 40)
+pygame.display.set_icon(pygame.image.load('data/img/frog.png'))
+font = pygame.font.Font("data/font/KGHAPPYSolid.ttf", 18)
+scoreFont = pygame.font.Font("data/font/KGHAPPYSolid.ttf", 70)
+entryFont = pygame.font.Font("data/font/KGHAPPYSolid.ttf", 40)
 scoreWidth = 0
 scoreHeight = 0
 
@@ -19,26 +20,26 @@ scoreHeight = 0
 grav = 0.25
 
 BG = pygame.Color('#BEE0B4')
-startIMG = pygame.image.load('img/startbtn.png').convert_alpha()
-exitIMG = pygame.image.load('img/exitbtn.png').convert_alpha()
-logo = pygame.image.load('img/logo.png').convert_alpha()
+startIMG = pygame.image.load('data/img/startbtn.png').convert_alpha()
+exitIMG = pygame.image.load('data/img/exitbtn.png').convert_alpha()
+logo = pygame.image.load('data/img/logo.png').convert_alpha()
 logoRect = logo.get_rect()
 logoRect.x = (screenWidth / 2) - 184
 logo = pygame.transform.scale(logo, (int(logo.get_width() * .4), int(logo.get_height() * .4)))
 
-background = pygame.image.load('img/bg.png').convert_alpha()
+background = pygame.image.load('data/img/bg.png').convert_alpha()
 background = pygame.transform.scale(background, (int(background.get_width() * 1.3), int(background.get_height() * 1.3)))
 backgroundRect = background.get_rect()
-backgroundTwo = pygame.image.load('img/bg.png').convert_alpha()
+backgroundTwo = pygame.image.load('data/img/bg.png').convert_alpha()
 backgroundTwo = pygame.transform.scale(backgroundTwo,
                                        (int(backgroundTwo.get_width() * 1.3), int(backgroundTwo.get_height() * 1.3)))
 backgroundTwoRect = backgroundTwo.get_rect()
 backgroundTwoRect.y = -640
 
-bell = pygame.mixer.Sound('sound/bell.wav')
+bell = pygame.mixer.Sound('data/sound/bell.wav')
 bell.set_volume(.5)
-coin = pygame.mixer.Sound('sound/coin.wav')
-death = pygame.mixer.Sound('sound/death.wav')
+coin = pygame.mixer.Sound('data/sound/coin.wav')
+death = pygame.mixer.Sound('data/sound/death.wav')
 
 fliesCollected = 0
 
@@ -91,7 +92,7 @@ class Fly(pygame.sprite.Sprite):
         self.frameIndex = 0
         self.updateTime = pygame.time.get_ticks()
         for i in range(60):
-            img = pygame.image.load(f'img/fly/{i}.png').convert_alpha()
+            img = pygame.image.load(f'data/img/fly/{i}.png').convert_alpha()
             img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
             self.animationList.append(img)
         self.image = self.animationList[self.frameIndex]
@@ -131,7 +132,7 @@ class Fly(pygame.sprite.Sprite):
 class Frog(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("img/frog.png").convert_alpha()
+        img = pygame.image.load("data/img/frog.png").convert_alpha()
         # Object
         self.image = pygame.transform.scale(
             img, (int(img.get_width() * scale), int(img.get_height() * scale))
@@ -162,7 +163,7 @@ class Frog(pygame.sprite.Sprite):
             image = "frogright"
         else:
             image = "frog"
-        image = f"img/{image}.png"
+        image = f"data/img/{image}.png"
         image = pygame.image.load(image).convert_alpha()
         self.image = pygame.transform.scale(
             image, (int(image.get_width() * 0.17), int(image.get_height() * 0.17))
