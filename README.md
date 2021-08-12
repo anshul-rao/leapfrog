@@ -1,4 +1,4 @@
-# leapfrog
+# LeapFrog
 Welcome to our CSC Sample Game!
 LeapFrog is a pygame developed by Shivansh Patel and Anshul Rao from 8/5/21 - 8/12/21. 
 LeapFrog is meant to represent an intermediate level project and was made with python using the pygame module. 
